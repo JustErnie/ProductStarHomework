@@ -1,5 +1,10 @@
 package com.product.star.homework;
 
+
+import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public class Contact {
@@ -9,6 +14,14 @@ public class Contact {
     private final String surname;
     private final String email;
     private final String phone;
+
+    public static final RowMapper<Contact> contactRowMapper = (rs, rowNum) -> new Contact(
+            rs.getLong(1),
+            rs.getString(2),
+            rs.getString(3),
+            rs.getString(4),
+            rs.getString(5)
+    );
 
     public Contact(Long id, String name, String surname, String email, String phone) {
         this.id = id;
