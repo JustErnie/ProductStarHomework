@@ -11,6 +11,7 @@ import java.util.List;
 public class ContactDao {
 
     private final NamedParameterJdbcTemplate namedJdbcTemplate;
+    private static final String SQL_INSERT_NEW_ROW = "INSERT INTO my_contact (name, surname, email, phone) VALUES (:name, :surname, :email, :phone)";
 
     public ContactDao(NamedParameterJdbcTemplate namedJdbcTemplate) {
         this.namedJdbcTemplate = namedJdbcTemplate;
@@ -26,16 +27,21 @@ public class ContactDao {
     }
 
     public void saveAll(Collection<Contact> contacts) {
-        for (Contact contact : contacts) {
-            save(contact);
-        }
+        MapSqlParameterSource[] args = contacts.stream()
+                .map(contact -> new MapSqlParameterSource()
+                        .addValue("name", contact.getName())
+                        .addValue("surname", contact.getSurname())
+                        .addValue("email", contact.getEmail())
+                        .addValue("phone", contact.getPhone()))
+                .toArray(MapSqlParameterSource[]::new);
+
+        namedJdbcTemplate.batchUpdate(SQL_INSERT_NEW_ROW, args);
     }
 
     public Contact save(Contact contact) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "INSERT INTO my_contact (name, surname, email, phone) VALUES (:name, :surname, :email, :phone)";
         namedJdbcTemplate.update(
-                sql,
+                SQL_INSERT_NEW_ROW,
                 new MapSqlParameterSource()
                         .addValue("name", contact.getName())
                         .addValue("surname", contact.getSurname())
@@ -64,5 +70,7 @@ public class ContactDao {
         namedJdbcTemplate.update(sql, new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("phone", newPhone));
+
+
     }
 }
